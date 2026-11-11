@@ -75,7 +75,7 @@ table.cmp{width:100%;border-collapse:collapse;font-size:13px;min-width:480px}
 .btn small{display:block;font-weight:400;font-size:11px}
 .leg span.r:before{border-top:3px dotted var(--yel)}
 .leg span.p:before{border-top:3px dashed var(--yel)}
-#pick{position:fixed;inset:0;background:rgba(0,31,67,.78);display:flex;align-items:center;justify-content:center;z-index:50;padding:calc(12px + env(safe-area-inset-top,0px)) 12px calc(12px + env(safe-area-inset-bottom,0px))}
+#pick,#lp{position:fixed;inset:0;background:rgba(0,31,67,.78);display:flex;align-items:center;justify-content:center;z-index:50;padding:calc(12px + env(safe-area-inset-top,0px)) 12px calc(12px + env(safe-area-inset-bottom,0px))}
 .pk{background:var(--panel);color:var(--ink);border-radius:14px;padding:14px;max-width:560px;width:100%;max-height:100%;overflow:auto}
 @media (orientation:landscape) and (min-width:640px){
 .wrap{max-width:1120px}
@@ -154,17 +154,18 @@ body{background:#fff}
 <div class="act"><button class="btn ghost" id="theme">表示：自動</button><button class="btn danger" id="reset">全データを消去</button></div>
 </div>
 <div class="card"><h2>用語</h2>
-<p class="note"><span class="pill">効果的</span> 相手を崩した・好機を作った有効なボール（得点率には含めません）<br><span class="pill">得点</span> ポイントになったプレー（押すとコースを選べます）<br><span class="pill">得点率</span> 得点÷(得点＋ミス) ／ <span class="pill">効果率</span> 効果的÷全体<br>コース図は相手コートと自コートの各9ゾーンです。ストローク・サーブは相手の打った位置から自コートへ、レシーブは自コートの位置から相手コートへの返球です。</p>
+<p class="note"><span class="pill">効果的</span> 相手を崩した・好機を作った有効なボール（得点率には含めません）<br><span class="pill">得点</span> ポイントになったプレー（押すとコースを選べます）<br><span class="pill">ミス・失敗</span> 失点。押すと「アウト／ネット」を選べます<br><span class="pill">得点率</span> 得点÷(得点＋ミス) ／ <span class="pill">効果率</span> 効果的÷全体<br>コース図は相手コートと自コートの各9ゾーンです。ストローク・サーブは相手の打った位置から自コートへ、レシーブは自コートの位置から相手コートへの返球です。</p>
 </div>
 </section>
 </div>
+<div id="lp" hidden><div class="pk" style="max-width:380px"><h2 id="lpT">失点の種類</h2><div class="row c2"><button class="btn" data-t="out" style="padding:20px;font-size:18px">アウト</button><button class="btn" data-t="net" style="padding:20px;font-size:18px">ネット</button></div><div class="act"><button class="btn ghost" id="lpSkip">選ばない</button></div></div></div>
 <div id="pick" hidden><div class="pk"><h2>得点のコース</h2><p class="hint" id="pkHint"></p><div class="chips" id="pkDepth" style="margin-bottom:10px"></div><div class="row c3" id="pkPre" style="margin-bottom:10px" hidden></div><div class="court" id="pkCourt"></div><div class="act"><button class="btn ghost" id="pkSkip">コースは入力しない</button></div></div></div>
 <div id="report"></div>
 
 <script>
 var K='softtennis-v1';
-function blank(){return{c:{},z:[],h:[],p:[],o:[],on:'',n:1}}
-function load(){try{var r=localStorage.getItem(K);if(r){var d=JSON.parse(r);if(d.c&&d.c.rv)d.c={'0':d.c};d.p=d.p||[];d.o=d.o||[];d.on=d.on||'';d.n=d.n||1;return d}}catch(e){}return blank()}
+function blank(){return{c:{},z:[],h:[],p:[],o:[],e:[],on:'',n:1}}
+function load(){try{var r=localStorage.getItem(K);if(r){var d=JSON.parse(r);if(d.c&&d.c.rv)d.c={'0':d.c};d.p=d.p||[];d.o=d.o||[];d.e=d.e||[];d.on=d.on||'';d.n=d.n||1;return d}}catch(e){}return blank()}
 var S=load();
 function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
 var G=[{k:'rv',n:'サーブレシーブ',b:['成功','失敗']},{k:'st',n:'ストローク',b:['効果的','得点','ミス']},{k:'vo',n:'ボレー',b:['効果的','得点','ミス']}];
@@ -185,7 +186,7 @@ function renderCounters(){
   g.b.map(function(l,i){var cls=(l==='効果的'||(g.k==='rv'&&i===0))?'good':(l==='ミス'||l==='失敗')?'bad':'';
    return '<button class="cnt '+cls+'" data-k="'+g.k+'" data-i="'+i+'"><span>'+l+'</span><em>'+C(cp)[g.k][i]+'</em></button>'}).join('')+'</div></div>'}).join('');
  document.querySelectorAll('.cnt').forEach(function(b){b.onclick=function(){
-  var k=b.dataset.k,i=+b.dataset.i;C(cp)[k][i]++;S.h.push({a:'c',k:k,i:i,p:cp});save();renderCounters();if(i===1&&k!=='rv')openPick(k)}})}
+  var k=b.dataset.k,i=+b.dataset.i;C(cp)[k][i]++;S.h.push({a:'c',k:k,i:i,p:cp});save();renderCounters();if(i===1&&k!=='rv')openPick(k);else if(i===(k==='rv'?1:2))openLoss(k)}})}
 
 /* court */
 var X0=30,CW=80,Y0=20,CH=66.67;
@@ -256,7 +257,7 @@ function renderInCourt(){
 $('modeIn').querySelectorAll('button').forEach(function(b){b.onclick=function(){mi=b.dataset.m;org=null;
  $('modeIn').querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b)});renderInCourt()}});
 $('undo').onclick=function(){var a=S.h.pop();if(!a)return;
- if(a.a==='c'){var cc=C(a.p||0);cc[a.k][a.i]=Math.max(0,cc[a.k][a.i]-1);if(a.z)S.z.pop()}else S.z.pop();
+ if(a.a==='c'){var cc=C(a.p||0);cc[a.k][a.i]=Math.max(0,cc[a.k][a.i]-1);if(a.z)S.z.pop();if(a.m)S.e.pop()}else S.z.pop();
  org=null;save();renderCounters();renderInCourt()};
 
 /* analysis */
@@ -264,9 +265,9 @@ function pct(n,d){return d?Math.round(n/d*100):0}
 function bar(label,n,d,ng){var p=pct(n,d);
  return '<div class="bar"><div class="t"><span>'+label+'</span><span><strong>'+p+'%</strong><small>'+n+' / '+d+'</small></span></div><div class="trk" role="progressbar" aria-valuenow="'+p+'" aria-valuemin="0" aria-valuemax="100"><i class="'+(ng?'ng':'')+'" style="width:'+p+'%"></i></div></div>'}
 function renderStats(){
- var T=tot(fp),rv=T.rv,rn=rv[0]+rv[1],h='<div class="hint" style="font-weight:700;color:inherit">サーブレシーブ</div>'+bar('成功率',rv[0],rn)+bar('失敗率',rv[1],rn,1);
+ var T=tot(fp),rv=T.rv,rn=rv[0]+rv[1],h='<div class="hint" style="font-weight:700;color:inherit">サーブレシーブ</div>'+bar('成功率',rv[0],rn)+bar('失敗率',rv[1],rn,1)+lossBars('rv',rv[1]);
  [['st','ストローク'],['vo','ボレー']].forEach(function(g){var c=T[g[0]],n=c[0]+c[1]+c[2];
-  h+='<div class="hint" style="font-weight:700;color:inherit;margin-top:16px">'+g[1]+'</div>'+bar('得点率（得点÷(得点＋ミス)）',c[1],c[1]+c[2])+bar('効果率（効果的÷全体）',c[0],n)});
+  h+='<div class="hint" style="font-weight:700;color:inherit;margin-top:16px">'+g[1]+'</div>'+bar('得点率（得点÷(得点＋ミス)）',c[1],c[1]+c[2])+bar('効果率（効果的÷全体）',c[0],n)+lossBars(g[0],c[2])});
  $('stats').innerHTML=h}
 var RN=['後ろ','中','前'],CN=['左','中','右'],RB=['前','中','後ろ'];
 function renderAn(){
@@ -324,6 +325,17 @@ function renderOroster(){
 $('or').querySelectorAll('button').forEach(function(b){b.onclick=function(){nor=b.dataset.r;$('or').querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b)})}});
 $('oadd').onclick=function(){var v=$('opn').value.trim();if(!v){$('opn').focus();return}S.o.push({id:S.n++,n:v,r:nor});$('opn').value='';save();render()};
 $('on').value=S.on||'';$('on').oninput=function(){S.on=$('on').value;save()};
+
+/* loss type */
+var lk=null;
+function openLoss(k){lk=k;$('lpT').textContent=({rv:'レシーブ失敗',st:'ストロークのミス',vo:'ボレーのミス'})[k]+'：失点の種類';$('lp').hidden=false}
+function closeLoss(){lk=null;$('lp').hidden=true}
+document.querySelectorAll('#lp [data-t]').forEach(function(b){b.onclick=function(){
+ S.e.push({k:lk,p:cp,o:co,t:b.dataset.t});var l=S.h[S.h.length-1];if(l&&l.a==='c')l.m=true;save();closeLoss();renderCounters()}});
+$('lpSkip').onclick=closeLoss;
+function lossBars(k,total){
+ var e=S.e.filter(function(x){return x.k===k&&(fp==='all'||(x.p||0)==fp)}),o=e.filter(function(x){return x.t==='out'}).length,nt=e.filter(function(x){return x.t==='net'}).length;
+ return total?bar('　└ アウト',o,total,1)+bar('　└ ネット',nt,total,1):''}
 
 /* score course */
 var pk=null;

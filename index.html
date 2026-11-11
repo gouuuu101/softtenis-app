@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="戦術ボード">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#001F43">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<title>ソフトテニス戦術ボード</title>
+<style>
+:root{--navy:#001F43;--yel:#F4E511;--bg:#EDF1F7;--panel:#fff;--ink:#001F43;--sub:#4a5d78;--line:#cfd8e6;--track:#dfe6f0;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#001F43;--panel:#0a2d58;--ink:#fff;--sub:#a9b9d0;--line:#1d4276;--track:#04274f}}
+:root[data-theme="dark"]{--bg:#001F43;--panel:#0a2d58;--ink:#fff;--sub:#a9b9d0;--line:#1d4276;--track:#04274f}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding:14px 14px 40px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+header b{width:14px;height:34px;background:var(--yel);border-radius:3px;display:block}
+h1{font-size:20px;margin:0;font-weight:800;letter-spacing:.02em}
+nav{display:flex;gap:6px;background:var(--navy);padding:5px;border-radius:12px;margin-bottom:14px}
+nav button{flex:1;border:0;background:none;color:#fff;font:inherit;font-weight:700;padding:12px 4px;border-radius:8px;min-height:44px}
+nav button[aria-selected="true"]{background:var(--yel);color:var(--navy)}
+button:focus-visible{outline:3px solid var(--yel);outline-offset:2px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+h2{font-size:16px;margin:0 0 10px;font-weight:800}
+.row{display:grid;gap:8px}
+.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:1fr 1fr 1fr}
+.cnt{border:2px solid var(--navy);background:var(--panel);color:var(--ink);border-radius:12px;padding:10px 4px;font:inherit;min-height:84px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;touch-action:manipulation}
+.cnt span{font-size:14px;font-weight:700}.cnt em{font-style:normal;font-size:34px;font-weight:800;line-height:1.1}
+.cnt.good{background:var(--yel);border-color:var(--yel);color:var(--navy)}
+.cnt.bad{background:var(--navy);border-color:var(--navy);color:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cnt{border-color:var(--yel)}}
+.cnt:active{transform:scale(.97)}
+.seg{display:flex;gap:6px;margin-bottom:10px}
+.seg button{flex:1;border:2px solid var(--navy);background:none;color:var(--ink);font:inherit;font-weight:700;border-radius:10px;padding:10px;min-height:44px}
+.seg button[aria-pressed="true"]{background:var(--navy);color:var(--yel);border-color:var(--navy)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .seg button{border-color:var(--yel)}:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{background:var(--yel);color:var(--navy)}}
+.hint{font-size:13px;color:var(--sub);margin:0 0 8px;min-height:20px}
+.court{background:var(--navy);border-radius:12px;padding:8px;max-width:420px;margin:0 auto}
+.court svg{display:block;width:100%;height:auto;touch-action:manipulation}
+.act{display:flex;gap:8px;margin-top:10px}
+.btn{flex:1;border:2px solid var(--navy);background:var(--navy);color:#fff;font:inherit;font-weight:700;border-radius:10px;padding:11px;min-height:44px}
+.btn.ghost{background:none;color:var(--ink)}
+.btn.danger{background:#b3261e;border-color:#b3261e}
+.bar{margin:0 0 12px}
+.bar .t{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;font-weight:700}
+.bar .t strong{font-size:26px;font-weight:800}
+.bar .t small{color:var(--sub);font-weight:400;margin-left:6px}
+.trk{height:16px;background:var(--track);border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.trk i{display:block;height:100%;background:var(--yel);border-right:3px solid var(--navy);transition:width .35s}
+.trk i.ng{background:var(--navy);border-right:0}
+.note{font-size:14px;margin:10px 0 0}
+.leg{display:flex;gap:14px;font-size:12px;color:var(--sub);justify-content:center;margin-top:8px}
+.leg span:before{content:"";display:inline-block;width:18px;height:0;border-top:3px solid var(--yel);vertical-align:middle;margin-right:5px}
+.leg span.d:before{border-top:3px dashed var(--sub)}
+.pill{display:inline-block;background:var(--navy);color:var(--yel);border-radius:6px;padding:0 6px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{border:2px solid var(--navy);background:none;color:var(--ink);font:inherit;font-weight:700;border-radius:999px;padding:8px 14px;min-height:44px}
+.chips button small{margin-left:6px;font-weight:400;opacity:.8}
+.chips button[aria-pressed="true"]{background:var(--navy);color:var(--yel)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .chips button{border-color:var(--yel)}:root:not([data-theme="light"]) .chips button[aria-pressed="true"]{background:var(--yel);color:var(--navy)}:root:not([data-theme="light"]) .inp{border-color:var(--yel)}}
+.inp{flex:1;min-width:0;border:2px solid var(--navy);border-radius:10px;padding:10px;font:inherit;font-size:16px;background:var(--panel);color:var(--ink)}
+.rost{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-top:1px solid var(--line)}
+.rost button{border:0;background:none;color:#b3261e;font:inherit;font-weight:700;min-height:44px;padding:0 8px}
+.ov{overflow-x:auto}
+table.cmp{width:100%;border-collapse:collapse;font-size:13px;min-width:480px}
+.cmp th,.cmp td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:center}
+.cmp th:first-child,.cmp td:first-child{text-align:left}
+.btn small{display:block;font-weight:400;font-size:11px}
+.leg span.r:before{border-top:3px dotted var(--yel)}
+@media (orientation:landscape) and (min-width:640px){
+.wrap{max-width:1120px}
+#in,#an{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);column-gap:14px;align-items:start}
+#in>.card,#an>.card{grid-column:1}
+#in>.card:nth-child(3){grid-column:2;grid-row:1/3}
+#an>.card:nth-child(4){grid-column:2;grid-row:1/4}
+.court{max-width:none}
+.cnt{min-height:68px}
+}
+#report{display:none}
+#report h1{font-size:20px;margin:0 0 4px;border-left:10px solid #F4E511;padding-left:8px}
+#report h2{font-size:14px;margin:14px 0 6px}
+.rmeta{font-size:12px;color:var(--sub);margin:0}
+.rc{display:flex;gap:10px;break-inside:avoid}.rc>div{flex:1;min-width:0}.rc .court{max-width:none}
+.cap{font-weight:700;font-size:12px;margin-bottom:4px}
+@page{margin:12mm}
+@media print{
+:root:not([data-theme="light"]),:root[data-theme="dark"],:root{--bg:#fff;--panel:#fff;--ink:#001F43;--sub:#4a5d78;--line:#cfd8e6;--track:#dfe6f0}
+body{background:#fff}
+.wrap{display:none}
+#report{display:block;color:#001F43}
+.court,.trk,.trk i{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ov{overflow:visible}table.cmp{min-width:0}
+}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><b></b><h1>ソフトテニス戦術ボード</h1></header>
+<nav role="tablist">
+<button role="tab" data-v="in" aria-selected="true">入力</button>
+<button role="tab" data-v="an" aria-selected="false">分析</button>
+<button role="tab" data-v="se" aria-selected="false">設定</button>
+</nav>
+
+<section id="in">
+<div class="card"><h2>選手</h2><div class="chips" id="chipsIn"></div></div>
+<div class="card"><h2>プレー結果</h2><div id="counters"></div></div>
+<div class="card"><h2>相手のコース</h2>
+<div class="chips" id="opIn" style="margin-bottom:10px" hidden></div>
+<div class="seg" id="modeIn"><button data-m="st" aria-pressed="true">ストローク</button><button data-m="sv" aria-pressed="false">サーブ</button><button data-m="rc" aria-pressed="false">レシーブ</button></div>
+<p class="hint" id="hint"></p>
+<div class="chips" id="depth" style="margin-bottom:10px"></div>
+<div class="row c3" id="presets" style="margin-bottom:10px" hidden></div>
+<div class="court" id="courtIn"></div>
+<div class="act"><button class="btn ghost" id="undo">ひとつ戻す</button></div>
+</div>
+</section>
+
+<section id="an" hidden>
+<div class="card"><h2>選手</h2><div class="chips" id="chipsAn"></div><h2 style="margin-top:14px">相手選手（コース分析に反映）</h2><div class="chips" id="chipsOp"></div><div class="act"><button class="btn" id="pdf">分析をPDFで保存</button></div></div>
+<div class="card"><h2>確率</h2><div id="stats"></div></div>
+<div class="card" id="cmpCard"><h2>選手別の比較</h2><div class="ov" id="cmp"></div></div>
+<div class="card"><h2>コースの傾向</h2>
+<div class="seg" id="modeAn"><button data-m="st" aria-pressed="true">ストローク</button><button data-m="sv" aria-pressed="false">サーブ</button><button data-m="rc" aria-pressed="false">レシーブ</button><button data-m="all" aria-pressed="false">両方</button></div>
+<div class="court" id="courtAn"></div>
+<div class="leg"><span>ストローク</span><span class="d">サーブ</span><span class="r">レシーブ</span></div>
+<p class="note" id="insight"></p>
+</div>
+</section>
+
+<section id="se" hidden>
+<div class="card"><h2>選手登録</h2>
+<div class="seg" id="pr"><button data-r="前衛" aria-pressed="true">前衛</button><button data-r="後衛" aria-pressed="false">後衛</button></div>
+<div class="act" style="margin:0 0 8px"><input class="inp" id="pn" placeholder="選手名" maxlength="12"><button class="btn" id="padd" style="flex:0 0 88px">追加</button></div>
+<div id="roster"></div></div>
+<div class="card"><h2>対戦相手</h2>
+<input class="inp" id="on" placeholder="相手チーム名" maxlength="20" style="width:100%;margin-bottom:10px">
+<div class="seg" id="or"><button data-r="前衛" aria-pressed="true">前衛</button><button data-r="後衛" aria-pressed="false">後衛</button></div>
+<div class="act" style="margin:0 0 8px"><input class="inp" id="opn" placeholder="相手選手名" maxlength="12"><button class="btn" id="oadd" style="flex:0 0 88px">追加</button></div>
+<div id="orost"></div></div>
+<div class="card"><h2>データ管理</h2>
+<p class="hint">入力データはこの端末のブラウザに自動保存され、オフラインでも使えます。消去しても選手登録は残ります。</p>
+<div class="act"><button class="btn ghost" id="theme">表示：自動</button><button class="btn danger" id="reset">全データを消去</button></div>
+</div>
+<div class="card"><h2>用語</h2>
+<p class="note"><span class="pill">効果的</span> 相手を崩した・好機を作った有効なボール（得点率には含めません）<br><span class="pill">得点</span> ポイントになったプレー<br><span class="pill">得点率</span> 得点÷(得点＋ミス) ／ <span class="pill">効果率</span> 効果的÷全体<br>コース図は相手コートと自コートの各9ゾーンです。ストローク・サーブは相手の打った位置から自コートへ、レシーブは自コートの位置から相手コートへの返球です。</p>
+</div>
+</section>
+</div>
+<div id="report"></div>
+
+<script>
+var K='softtennis-v1';
+function blank(){return{c:{},z:[],h:[],p:[],o:[],on:'',n:1}}
+function load(){try{var r=localStorage.getItem(K);if(r){var d=JSON.parse(r);if(d.c&&d.c.rv)d.c={'0':d.c};d.p=d.p||[];d.o=d.o||[];d.on=d.on||'';d.n=d.n||1;return d}}catch(e){}return blank()}
+var S=load();
+function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
+var G=[{k:'rv',n:'サーブレシーブ',b:['成功','失敗']},{k:'st',n:'ストローク',b:['効果的','得点','ミス']},{k:'vo',n:'ボレー',b:['効果的','得点','ミス']}];
+var $=function(i){return document.getElementById(i)};
+var mi='st',ma='st',org=null,fp='all',cp=S.p.length?S.p[0].id:0,nr='前衛',nor='前衛',co=0,fo='all',forceP=false;
+function C(pid){if(!S.c[pid])S.c[pid]={rv:[0,0],st:[0,0,0],vo:[0,0,0]};return S.c[pid]}
+
+/* tabs */
+document.querySelectorAll('nav button').forEach(function(b){b.onclick=function(){
+ document.querySelectorAll('nav button').forEach(function(x){x.setAttribute('aria-selected',x===b)});
+ ['in','an','se'].forEach(function(v){$(v).hidden=v!==b.dataset.v});render()}});
+
+/* counters */
+function renderCounters(){
+ $('counters').innerHTML=G.map(function(g){
+  var cols=g.b.length===2?'c2':'c3';
+  return '<div style="margin-bottom:12px"><div class="hint" style="font-weight:700;color:inherit">'+g.n+'</div><div class="row '+cols+'">'+
+  g.b.map(function(l,i){var cls=(l==='効果的'||(g.k==='rv'&&i===0))?'good':(l==='ミス'||l==='失敗')?'bad':'';
+   return '<button class="cnt '+cls+'" data-k="'+g.k+'" data-i="'+i+'"><span>'+l+'</span><em>'+C(cp)[g.k][i]+'</em></button>'}).join('')+'</div></div>'}).join('');
+ document.querySelectorAll('.cnt').forEach(function(b){b.onclick=function(){
+  var k=b.dataset.k,i=+b.dataset.i;C(cp)[k][i]++;S.h.push({a:'c',k:k,i:i,p:cp});save();renderCounters()}})}
+
+/* court */
+var X0=30,CW=80,Y0=20,CH=66.67;
+var mq=window.matchMedia('(orientation:landscape) and (min-width:640px)'),dp=2;
+function isL(){return !forceP&&mq.matches}
+if(mq.addEventListener)mq.addEventListener('change',function(){render()});else if(mq.addListener)mq.addListener(function(){render()});
+function R(hh,i){var r=Math.floor(i/3),c=i%3;
+ if(isL())return{x:(hh==='t'?20:220)+CH*r,y:30+80*(2-c),w:CH,h:80};
+ return{x:X0+CW*c,y:(hh==='t'?20:220)+CH*r,w:CW,h:CH}}
+function cxy(hh,i){var q=R(hh,i);return{x:q.x+q.w/2,y:q.y+q.h/2}}
+function courtSVG(kind,sel,heat,pf){
+ var L=isL(),zc=zoneCounts(kind,pf),mT=Math.max.apply(null,zc.T.concat([1])),mF=Math.max.apply(null,zc.F.concat([1]));
+ var s='<svg viewBox="0 0 '+(L?440:300)+' '+(L?300:440)+'" role="img" aria-label="コート図">';
+ s+=L?'<rect x="20" y="30" width="400" height="240" fill="none" stroke="#fff" stroke-width="2"/>':'<rect x="30" y="20" width="240" height="400" fill="none" stroke="#fff" stroke-width="2"/>';
+ for(var h=0;h<2;h++)for(var i=0;i<9;i++){
+  var hh=h?'b':'t',q=R(hh,i),cnt=heat?(h?zc.T[i]:zc.F[i]):0,mx=h?mT:mF;
+  var a=heat?(cnt/mx)*.55:0,isSel=sel&&sel.h===hh&&sel.i===i;
+  s+='<rect data-h="'+hh+'" data-i="'+i+'" x="'+q.x+'" y="'+q.y+'" width="'+q.w+'" height="'+q.h+'" fill="rgba('+((h||isSel)?'244,229,17':'255,255,255')+','+(isSel?.7:a)+')" stroke="'+(isSel?'#F4E511':'rgba(255,255,255,.35)')+'" stroke-width="'+(isSel?3:1)+'"/>';
+  s+='<text x="'+(q.x+q.w/2)+'" y="'+(q.y+q.h/2+5)+'" text-anchor="middle" font-size="'+(heat&&cnt?20:13)+'" font-weight="'+(heat&&cnt?800:400)+'" fill="'+(heat&&cnt?(h?'#F4E511':'#fff'):'rgba(255,255,255,.45)')+'" pointer-events="none">'+(heat?(cnt||''):(i+1))+'</text>'}
+ s+=L?'<line x1="220" y1="12" x2="220" y2="288" stroke="#F4E511" stroke-width="4"/>':'<line x1="12" y1="220" x2="288" y2="220" stroke="#F4E511" stroke-width="4"/>';
+ s+='<text x="'+(L?120:150)+'" y="'+(L?20:12)+'" text-anchor="middle" font-size="10" fill="rgba(255,255,255,.7)">相手コート</text>';
+ s+='<text x="'+(L?320:150)+'" y="'+(L?292:436)+'" text-anchor="middle" font-size="10" fill="rgba(255,255,255,.7)">自コート</text>';
+ var m=agg(kind,pf);
+ Object.keys(m).forEach(function(q){var z=m[q],w=Math.min(2+z.n*1.5,9),rc=z.k==='rc',sv=z.k==='sv',a=cxy(rc?'b':'t',z.f),b=cxy(rc?'t':'b',z.t),col=sv?'#fff':'#F4E511';
+  s+='<line x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'" stroke="'+col+'" stroke-width="'+w+'" stroke-linecap="round" opacity=".8"'+(sv?' stroke-dasharray="8 6"':rc?' stroke-dasharray="1 10"':'')+' pointer-events="none"/>';
+  s+='<circle cx="'+b.x+'" cy="'+b.y+'" r="'+(w/2+3)+'" fill="'+col+'" pointer-events="none"/>'});
+ return s+'</svg>'}
+function cx(c){return X0+CW*c+CW/2}
+function cy(h,r){return (h==='t'?Y0:220)+CH*r+CH/2}
+function agg(kind,pf){var m={};S.z.forEach(function(z){if((kind==='all'||z.k===kind)&&(pf==null||pf==='all'||(z.p||0)==pf)&&(pf==null||fo==='all'||(z.o||0)==fo)){var q=z.k+z.f+'-'+z.t;m[q]=m[q]||{f:z.f,t:z.t,n:0,k:z.k};m[q].n++}});return m}
+function zoneCounts(kind,pf){var T=[0,0,0,0,0,0,0,0,0],F=[0,0,0,0,0,0,0,0,0];
+ S.z.forEach(function(z){if((kind==='all'||z.k===kind)&&(pf==null||pf==='all'||(z.p||0)==pf)&&(pf==null||fo==='all'||(z.o||0)==fo)){if(z.k==='rc'){T[z.f]++;F[z.t]++}else{T[z.t]++;F[z.f]++}}});return{T:T,F:F}}
+function courtSVGold(kind,sel,heat,pf){
+ var zc=zoneCounts(kind,pf),mT=Math.max.apply(null,zc.T.concat([1])),mF=Math.max.apply(null,zc.F.concat([1]));
+ var s='<svg viewBox="0 0 300 440" role="img" aria-label="コート図">';
+ s+='<rect x="30" y="20" width="240" height="400" fill="none" stroke="#fff" stroke-width="2"/>';
+ for(var h=0;h<2;h++)for(var i=0;i<9;i++){
+  var hh=h?'b':'t',r=Math.floor(i/3),c=i%3,x=X0+CW*c,y=(h?220:20)+CH*r;
+  var cnt=heat?(h?zc.T[i]:zc.F[i]):0,mx=h?mT:mF;
+  var fill=h?'244,229,17':'255,255,255',a=heat?(cnt/mx)*.55:0;
+  var isSel=sel&&!h&&sel.i===i;
+  s+='<rect data-h="'+hh+'" data-i="'+i+'" x="'+x+'" y="'+y+'" width="'+CW+'" height="'+CH+'" fill="rgba('+fill+','+(isSel?.7:a)+')" stroke="rgba(255,255,255,.35)" stroke-width="1"'+(isSel?' stroke="#F4E511"':'')+'/>';
+  s+='<text x="'+(x+CW/2)+'" y="'+(y+CH/2+5)+'" text-anchor="middle" font-size="'+(heat&&cnt?20:13)+'" font-weight="'+(heat&&cnt?800:400)+'" fill="'+(heat&&cnt?(h?'#F4E511':'#fff'):'rgba(255,255,255,.45)')+'" pointer-events="none">'+(heat?(cnt||''):(i+1))+'</text>'}
+ s+='<line x1="12" y1="220" x2="288" y2="220" stroke="#F4E511" stroke-width="4"/>';
+ s+='<text x="150" y="12" text-anchor="middle" font-size="10" fill="rgba(255,255,255,.7)">相手コート（打った位置）</text>';
+ s+='<text x="150" y="436" text-anchor="middle" font-size="10" fill="rgba(255,255,255,.7)">自コート（着弾ゾーン）</text>';
+ var m=agg(kind,pf),mn=1;Object.keys(m).forEach(function(q){mn=Math.max(mn,m[q].n)});
+ Object.keys(m).forEach(function(q){var z=m[q],f=z.f,t=z.t,w=Math.min(2+z.n*1.5,9);
+  var x1=cx(f%3),y1=cy('t',Math.floor(f/3)),x2=cx(t%3),y2=cy('b',Math.floor(t/3));
+  s+='<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+(z.k==='sv'?'#fff':'#F4E511')+'" stroke-width="'+w+'" stroke-linecap="round" opacity=".8"'+(z.k==='sv'?' stroke-dasharray="8 6"':'')+' pointer-events="none"/>';
+  s+='<circle cx="'+x2+'" cy="'+y2+'" r="'+(w/2+3)+'" fill="'+(z.k==='sv'?'#fff':'#F4E511')+'" pointer-events="none"/>'});
+ return s+'</svg>'}
+function addZ(t){S.z.push({k:mi,f:org.i,t:t,p:cp,o:co});S.h.push({a:'z'});org=null;save()}
+function renderInCourt(){
+ var rc=mi==='rc',side=rc?'b':'t';
+ $('courtIn').innerHTML=courtSVG(mi,org,false);
+ $('hint').textContent=org?'コースのボタン、または'+(rc?'相手':'自')+'コートの着弾ゾーンをタップ':'まず、'+(rc?'自コートのレシーブ位置':'相手コートの打った位置')+'をタップ';
+ var d=$('depth');d.innerHTML='<span class="hint" style="margin:0;align-self:center">着弾の深さ</span>'+chipsHTML([{id:0,n:'前',r:''},{id:1,n:'中',r:''},{id:2,n:'後ろ',r:''}],dp);
+ d.querySelectorAll('button').forEach(function(b){b.onclick=function(){dp=+b.dataset.id;renderInCourt()}});
+ var pr=$('presets');pr.hidden=!org;
+ if(org){var oc=org.i%3;
+  pr.innerHTML=[0,1,2].map(function(dc){var nm=dc===oc?'ストレート':dc===1?'センター':'クロス';return '<button class="btn" data-dc="'+dc+'">'+nm+'<small>'+['左','中','右'][dc]+'</small></button>'}).join('');
+  pr.querySelectorAll('button').forEach(function(b){b.onclick=function(){addZ((rc?2-dp:dp)*3+(+b.dataset.dc));renderInCourt()}})}
+ $('courtIn').querySelectorAll('rect').forEach(function(r){r.onclick=function(){
+  var i=+r.dataset.i;
+  if(r.dataset.h===side)org={i:i,h:side};else if(org)addZ(i);
+  renderInCourt()}})}
+$('modeIn').querySelectorAll('button').forEach(function(b){b.onclick=function(){mi=b.dataset.m;org=null;
+ $('modeIn').querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b)});renderInCourt()}});
+$('undo').onclick=function(){var a=S.h.pop();if(!a)return;
+ if(a.a==='c'){var cc=C(a.p||0);cc[a.k][a.i]=Math.max(0,cc[a.k][a.i]-1)}else S.z.pop();
+ org=null;save();renderCounters();renderInCourt()};
+
+/* analysis */
+function pct(n,d){return d?Math.round(n/d*100):0}
+function bar(label,n,d,ng){var p=pct(n,d);
+ return '<div class="bar"><div class="t"><span>'+label+'</span><span><strong>'+p+'%</strong><small>'+n+' / '+d+'</small></span></div><div class="trk" role="progressbar" aria-valuenow="'+p+'" aria-valuemin="0" aria-valuemax="100"><i class="'+(ng?'ng':'')+'" style="width:'+p+'%"></i></div></div>'}
+function renderStats(){
+ var T=tot(fp),rv=T.rv,rn=rv[0]+rv[1],h='<div class="hint" style="font-weight:700;color:inherit">サーブレシーブ</div>'+bar('成功率',rv[0],rn)+bar('失敗率',rv[1],rn,1);
+ [['st','ストローク'],['vo','ボレー']].forEach(function(g){var c=T[g[0]],n=c[0]+c[1]+c[2];
+  h+='<div class="hint" style="font-weight:700;color:inherit;margin-top:16px">'+g[1]+'</div>'+bar('得点率（得点÷(得点＋ミス)）',c[1],c[1]+c[2])+bar('効果率（効果的÷全体）',c[0],n)});
+ $('stats').innerHTML=h}
+var RN=['後ろ','中','前'],CN=['左','中','右'],RB=['前','中','後ろ'];
+function renderAn(){
+ $('courtAn').innerHTML=courtSVG(ma,null,true,fp);
+ var zc=zoneCounts(ma,fp),tot=zc.T.reduce(function(a,b){return a+b},0);
+ if(!tot){$('insight').textContent='まだコースのデータがありません。「入力」タブで記録しましょう。';return}
+ var bi=zc.T.indexOf(Math.max.apply(null,zc.T)),fi=zc.F.indexOf(Math.max.apply(null,zc.F));
+ if(ma==='rc'){$('insight').innerHTML='全 <b>'+tot+'</b> 本。レシーブ位置は自コートの「<b>'+RB[Math.floor(bi/3)]+'・'+CN[bi%3]+'</b>」が最多、返球先は相手コートの「<b>'+RN[Math.floor(fi/3)]+'・'+CN[fi%3]+'</b>」が最多です。';return}
+ $('insight').innerHTML='全 <b>'+tot+'</b> 本。自コートで最も打ち込まれたのは「<b>'+RB[Math.floor(bi/3)]+'・'+CN[bi%3]+'</b>」（'+pct(zc.T[bi],tot)+'%）。相手が最も多く打った位置は「<b>'+RN[Math.floor(fi/3)]+'・'+CN[fi%3]+'</b>」です。'}
+$('modeAn').querySelectorAll('button').forEach(function(b){b.onclick=function(){ma=b.dataset.m;
+ $('modeAn').querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b)});renderAn()}});
+
+/* players */
+function tot(pid){var T={rv:[0,0],st:[0,0,0],vo:[0,0,0]};Object.keys(S.c).forEach(function(k){if(pid==='all'||String(pid)===k)['rv','st','vo'].forEach(function(g){S.c[k][g].forEach(function(v,i){T[g][i]+=v})})});return T}
+function rt(c,m){var n=c.reduce(function(a,b){return a+b},0),d=n,v=c[0];if(m==='s'){v=c[1];d=c[1]+c[2]}return d?Math.round(v/d*100)+'%':'–'}
+function chipsHTML(list,sel){return list.map(function(p){return '<button data-id="'+p.id+'" aria-pressed="'+(p.id===sel)+'">'+p.n+(p.r?'<small>'+p.r+'</small>':'')+'</button>'}).join('')}
+function renderChips(){
+ if(!S.p.some(function(p){return p.id===cp}))cp=S.p.length?S.p[0].id:0;
+ var il=$('chipsIn');
+ if(!S.p.length){il.innerHTML='<p class="hint" style="margin:0">「設定」タブで選手を登録すると、選手別に記録・分析できます。未登録のときはチーム全体として記録します。</p>'}
+ else{il.innerHTML=chipsHTML(S.p,cp);il.querySelectorAll('button').forEach(function(b){b.onclick=function(){cp=+b.dataset.id;org=null;renderChips();renderCounters();renderInCourt()}})}
+ var al=S.p.slice();if(S.p.length&&S.c[0])al.push({id:0,n:'未割当',r:''});
+ if(fp!=='all'&&!al.some(function(p){return p.id===fp}))fp='all';
+ var all=[{id:'all',n:'全員',r:''}].concat(al);
+ var ac=$('chipsAn');ac.innerHTML=chipsHTML(all,fp);
+ ac.querySelectorAll('button').forEach(function(b){b.onclick=function(){fp=b.dataset.id==='all'?'all':+b.dataset.id;renderChips();renderStats();renderAn();renderCmp()}})}
+function renderCmp(){
+ $('cmpCard').hidden=!S.p.length;if(!S.p.length)return;
+ var h='<table class="cmp"><tr><th>選手</th><th>レシーブ<br>成功率</th><th>ストローク<br>得点率</th><th>ストローク<br>効果率</th><th>ボレー<br>得点率</th><th>ボレー<br>効果率</th></tr>';
+ S.p.forEach(function(p){var T=tot(p.id);h+='<tr><td>'+p.n+' <small>'+p.r+'</small></td><td>'+rt(T.rv,'e')+'</td><td>'+rt(T.st,'s')+'</td><td>'+rt(T.st,'e')+'</td><td>'+rt(T.vo,'s')+'</td><td>'+rt(T.vo,'e')+'</td></tr>'});
+ $('cmp').innerHTML=h+'</table>'}
+function renderRoster(){
+ $('roster').innerHTML=S.p.length?S.p.map(function(p){return '<div class="rost"><span><b>'+p.n+'</b> <small>'+p.r+'</small></span><button data-id="'+p.id+'">削除</button></div>'}).join(''):'<p class="hint">まだ選手が登録されていません。</p>';
+ $('roster').querySelectorAll('button').forEach(function(b){b.onclick=function(){var id=+b.dataset.id;S.p=S.p.filter(function(p){return p.id!==id});save();render()}})}
+$('pr').querySelectorAll('button').forEach(function(b){b.onclick=function(){nr=b.dataset.r;$('pr').querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b)})}});
+$('padd').onclick=function(){var v=$('pn').value.trim();if(!v){$('pn').focus();return}
+ S.p.push({id:S.n++,n:v,r:nr});$('pn').value='';save();render()};
+
+/* opponents */
+function pname(id){var p=S.p.filter(function(x){return x.id===id})[0];return p?p.n:'未割当'}
+function oname(id){var o=S.o.filter(function(x){return x.id===id})[0];return o?o.n:'指定なし'}
+function renderOps(){
+ if(co&&!S.o.some(function(o){return o.id===co}))co=0;
+ var oi=$('opIn');oi.hidden=!S.o.length;
+ oi.innerHTML=S.o.length?'<span class="hint" style="margin:0;align-self:center">相手選手</span>'+chipsHTML([{id:0,n:'指定なし',r:''}].concat(S.o),co):'';
+ oi.querySelectorAll('button').forEach(function(b){b.onclick=function(){co=+b.dataset.id;renderOps()}});
+ var al=S.o.slice();if(S.o.length&&S.z.some(function(z){return !z.o}))al.push({id:0,n:'指定なし',r:''});
+ if(fo!=='all'&&!al.some(function(o){return o.id===fo}))fo='all';
+ var ac=$('chipsOp');
+ ac.innerHTML=S.o.length?chipsHTML([{id:'all',n:'全員',r:''}].concat(al),fo):'<p class="hint" style="margin:0">「設定」タブで相手選手を登録すると絞り込めます。</p>';
+ ac.querySelectorAll('button').forEach(function(b){b.onclick=function(){fo=b.dataset.id==='all'?'all':+b.dataset.id;renderOps();renderAn()}})}
+function renderOroster(){
+ $('orost').innerHTML=S.o.length?S.o.map(function(p){return '<div class="rost"><span><b>'+p.n+'</b> <small>'+p.r+'</small></span><button data-id="'+p.id+'">削除</button></div>'}).join(''):'<p class="hint">相手選手は未登録です。</p>';
+ $('orost').querySelectorAll('button').forEach(function(b){b.onclick=function(){var id=+b.dataset.id;S.o=S.o.filter(function(p){return p.id!==id});save();render()}})}
+$('or').querySelectorAll('button').forEach(function(b){b.onclick=function(){nor=b.dataset.r;$('or').querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b)})}});
+$('oadd').onclick=function(){var v=$('opn').value.trim();if(!v){$('opn').focus();return}S.o.push({id:S.n++,n:v,r:nor});$('opn').value='';save();render()};
+$('on').value=S.on||'';$('on').oninput=function(){S.on=$('on').value;save()};
+
+/* pdf */
+function buildReport(){
+ forceP=true;
+ var d=new Date(),h='<h1>ソフトテニス 分析レポート</h1><p class="rmeta">'+d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日　対戦相手：'+(S.on||'未設定')+'　選手：'+(fp==='all'?'全員':pname(fp))+'　相手選手：'+(fo==='all'?'全員':oname(fo))+'</p>';
+ renderStats();h+='<h2>確率</h2>'+$('stats').innerHTML;
+ if(S.p.length){renderCmp();h+='<h2>選手別の比較</h2>'+$('cmp').innerHTML}
+ h+='<h2>コースの傾向</h2><div class="rc">'+[['st','ストローク（黄色の実線）'],['sv','サーブ（白の破線）'],['rc','レシーブ（黄色の点線）']].map(function(k){return '<div><div class="cap">'+k[1]+'</div><div class="court">'+courtSVG(k[0],null,true,fp)+'</div></div>'}).join('')+'</div>';
+ $('report').innerHTML=h;forceP=false}
+$('pdf').onclick=function(){buildReport();setTimeout(function(){try{window.print()}catch(e){alert('この表示では印刷できません。ホーム画面に追加したアプリから実行してください。')}},150)};
+
+/* settings */
+var armed=false,th='auto';
+$('reset').onclick=function(){var b=$('reset');
+ if(!armed){armed=true;b.textContent='もう一度押すと消去します';setTimeout(function(){armed=false;b.textContent='全データを消去'},4000);return}
+ var kp=S.p,ko=S.o,kt=S.on,kn=S.n;S=blank();S.p=kp;S.o=ko;S.on=kt;S.n=kn;org=null;save();armed=false;b.textContent='全データを消去';render()};
+$('theme').onclick=function(){th=th==='auto'?'dark':th==='dark'?'light':'auto';
+ if(th==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',th);
+ $('theme').textContent='表示：'+({auto:'自動',dark:'ダーク',light:'ライト'})[th]};
+
+function render(){renderChips();renderOps();renderRoster();renderOroster();renderCounters();renderInCourt();renderStats();renderAn();renderCmp()}
+render();
+if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){})});
+</script>
+</body>
+</html>

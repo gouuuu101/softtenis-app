@@ -74,6 +74,9 @@ table.cmp{width:100%;border-collapse:collapse;font-size:13px;min-width:480px}
 .cmp th:first-child,.cmp td:first-child{text-align:left}
 .btn small{display:block;font-weight:400;font-size:11px}
 .leg span.r:before{border-top:3px dotted var(--yel)}
+.leg span.p:before{border-top:3px dashed var(--yel)}
+#pick{position:fixed;inset:0;background:rgba(0,31,67,.78);display:flex;align-items:center;justify-content:center;z-index:50;padding:calc(12px + env(safe-area-inset-top,0px)) 12px calc(12px + env(safe-area-inset-bottom,0px))}
+.pk{background:var(--panel);color:var(--ink);border-radius:14px;padding:14px;max-width:560px;width:100%;max-height:100%;overflow:auto}
 @media (orientation:landscape) and (min-width:640px){
 .wrap{max-width:1120px}
 #in,#an{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);column-gap:14px;align-items:start}
@@ -87,7 +90,7 @@ table.cmp{width:100%;border-collapse:collapse;font-size:13px;min-width:480px}
 #report h1{font-size:20px;margin:0 0 4px;border-left:10px solid #F4E511;padding-left:8px}
 #report h2{font-size:14px;margin:14px 0 6px}
 .rmeta{font-size:12px;color:var(--sub);margin:0}
-.rc{display:flex;gap:10px;break-inside:avoid}.rc>div{flex:1;min-width:0}.rc .court{max-width:none}
+.rc{display:flex;flex-wrap:wrap;gap:10px}.rc>div{flex:0 0 calc(50% - 5px);min-width:0;break-inside:avoid}.rc .court{max-width:none}
 .cap{font-weight:700;font-size:12px;margin-bottom:4px}
 @page{margin:12mm}
 @media print{
@@ -129,9 +132,9 @@ body{background:#fff}
 <div class="card"><h2>確率</h2><div id="stats"></div></div>
 <div class="card" id="cmpCard"><h2>選手別の比較</h2><div class="ov" id="cmp"></div></div>
 <div class="card"><h2>コースの傾向</h2>
-<div class="seg" id="modeAn"><button data-m="st" aria-pressed="true">ストローク</button><button data-m="sv" aria-pressed="false">サーブ</button><button data-m="rc" aria-pressed="false">レシーブ</button><button data-m="all" aria-pressed="false">両方</button></div>
+<div class="seg" id="modeAn"><button data-m="st" aria-pressed="true">ストローク</button><button data-m="sv" aria-pressed="false">サーブ</button><button data-m="rc" aria-pressed="false">レシーブ</button><button data-m="pt" aria-pressed="false">得点</button><button data-m="all" aria-pressed="false">両方</button></div>
 <div class="court" id="courtAn"></div>
-<div class="leg"><span>ストローク</span><span class="d">サーブ</span><span class="r">レシーブ</span></div>
+<div class="leg"><span>ストローク</span><span class="d">サーブ</span><span class="r">レシーブ</span><span class="p">得点</span></div>
 <p class="note" id="insight"></p>
 </div>
 </section>
@@ -151,10 +154,11 @@ body{background:#fff}
 <div class="act"><button class="btn ghost" id="theme">表示：自動</button><button class="btn danger" id="reset">全データを消去</button></div>
 </div>
 <div class="card"><h2>用語</h2>
-<p class="note"><span class="pill">効果的</span> 相手を崩した・好機を作った有効なボール（得点率には含めません）<br><span class="pill">得点</span> ポイントになったプレー<br><span class="pill">得点率</span> 得点÷(得点＋ミス) ／ <span class="pill">効果率</span> 効果的÷全体<br>コース図は相手コートと自コートの各9ゾーンです。ストローク・サーブは相手の打った位置から自コートへ、レシーブは自コートの位置から相手コートへの返球です。</p>
+<p class="note"><span class="pill">効果的</span> 相手を崩した・好機を作った有効なボール（得点率には含めません）<br><span class="pill">得点</span> ポイントになったプレー（押すとコースを選べます）<br><span class="pill">得点率</span> 得点÷(得点＋ミス) ／ <span class="pill">効果率</span> 効果的÷全体<br>コース図は相手コートと自コートの各9ゾーンです。ストローク・サーブは相手の打った位置から自コートへ、レシーブは自コートの位置から相手コートへの返球です。</p>
 </div>
 </section>
 </div>
+<div id="pick" hidden><div class="pk"><h2>得点のコース</h2><p class="hint" id="pkHint"></p><div class="chips" id="pkDepth" style="margin-bottom:10px"></div><div class="row c3" id="pkPre" style="margin-bottom:10px" hidden></div><div class="court" id="pkCourt"></div><div class="act"><button class="btn ghost" id="pkSkip">コースは入力しない</button></div></div></div>
 <div id="report"></div>
 
 <script>
@@ -181,7 +185,7 @@ function renderCounters(){
   g.b.map(function(l,i){var cls=(l==='効果的'||(g.k==='rv'&&i===0))?'good':(l==='ミス'||l==='失敗')?'bad':'';
    return '<button class="cnt '+cls+'" data-k="'+g.k+'" data-i="'+i+'"><span>'+l+'</span><em>'+C(cp)[g.k][i]+'</em></button>'}).join('')+'</div></div>'}).join('');
  document.querySelectorAll('.cnt').forEach(function(b){b.onclick=function(){
-  var k=b.dataset.k,i=+b.dataset.i;C(cp)[k][i]++;S.h.push({a:'c',k:k,i:i,p:cp});save();renderCounters()}})}
+  var k=b.dataset.k,i=+b.dataset.i;C(cp)[k][i]++;S.h.push({a:'c',k:k,i:i,p:cp});save();renderCounters();if(i===1&&k!=='rv')openPick(k)}})}
 
 /* court */
 var X0=30,CW=80,Y0=20,CH=66.67;
@@ -205,15 +209,15 @@ function courtSVG(kind,sel,heat,pf){
  s+='<text x="'+(L?120:150)+'" y="'+(L?20:12)+'" text-anchor="middle" font-size="10" fill="rgba(255,255,255,.7)">相手コート</text>';
  s+='<text x="'+(L?320:150)+'" y="'+(L?292:436)+'" text-anchor="middle" font-size="10" fill="rgba(255,255,255,.7)">自コート</text>';
  var m=agg(kind,pf);
- Object.keys(m).forEach(function(q){var z=m[q],w=Math.min(2+z.n*1.5,9),rc=z.k==='rc',sv=z.k==='sv',a=cxy(rc?'b':'t',z.f),b=cxy(rc?'t':'b',z.t),col=sv?'#fff':'#F4E511';
-  s+='<line x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'" stroke="'+col+'" stroke-width="'+w+'" stroke-linecap="round" opacity=".8"'+(sv?' stroke-dasharray="8 6"':rc?' stroke-dasharray="1 10"':'')+' pointer-events="none"/>';
+ Object.keys(m).forEach(function(q){var z=m[q],w=Math.min(2+z.n*1.5,9),rc=z.k==='rc'||z.k==='pt',sv=z.k==='sv',a=cxy(rc?'b':'t',z.f),b=cxy(rc?'t':'b',z.t),col=sv?'#fff':'#F4E511';
+  s+='<line x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'" stroke="'+col+'" stroke-width="'+w+'" stroke-linecap="round" opacity=".8"'+(sv?' stroke-dasharray="8 6"':z.k==='pt'?' stroke-dasharray="12 5 2 5"':rc?' stroke-dasharray="1 10"':'')+' pointer-events="none"/>';
   s+='<circle cx="'+b.x+'" cy="'+b.y+'" r="'+(w/2+3)+'" fill="'+col+'" pointer-events="none"/>'});
  return s+'</svg>'}
 function cx(c){return X0+CW*c+CW/2}
 function cy(h,r){return (h==='t'?Y0:220)+CH*r+CH/2}
 function agg(kind,pf){var m={};S.z.forEach(function(z){if((kind==='all'||z.k===kind)&&(pf==null||pf==='all'||(z.p||0)==pf)&&(pf==null||fo==='all'||(z.o||0)==fo)){var q=z.k+z.f+'-'+z.t;m[q]=m[q]||{f:z.f,t:z.t,n:0,k:z.k};m[q].n++}});return m}
 function zoneCounts(kind,pf){var T=[0,0,0,0,0,0,0,0,0],F=[0,0,0,0,0,0,0,0,0];
- S.z.forEach(function(z){if((kind==='all'||z.k===kind)&&(pf==null||pf==='all'||(z.p||0)==pf)&&(pf==null||fo==='all'||(z.o||0)==fo)){if(z.k==='rc'){T[z.f]++;F[z.t]++}else{T[z.t]++;F[z.f]++}}});return{T:T,F:F}}
+ S.z.forEach(function(z){if((kind==='all'||z.k===kind)&&(pf==null||pf==='all'||(z.p||0)==pf)&&(pf==null||fo==='all'||(z.o||0)==fo)){if(z.k==='rc'||z.k==='pt'){T[z.f]++;F[z.t]++}else{T[z.t]++;F[z.f]++}}});return{T:T,F:F}}
 function courtSVGold(kind,sel,heat,pf){
  var zc=zoneCounts(kind,pf),mT=Math.max.apply(null,zc.T.concat([1])),mF=Math.max.apply(null,zc.F.concat([1]));
  var s='<svg viewBox="0 0 300 440" role="img" aria-label="コート図">';
@@ -252,7 +256,7 @@ function renderInCourt(){
 $('modeIn').querySelectorAll('button').forEach(function(b){b.onclick=function(){mi=b.dataset.m;org=null;
  $('modeIn').querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b)});renderInCourt()}});
 $('undo').onclick=function(){var a=S.h.pop();if(!a)return;
- if(a.a==='c'){var cc=C(a.p||0);cc[a.k][a.i]=Math.max(0,cc[a.k][a.i]-1)}else S.z.pop();
+ if(a.a==='c'){var cc=C(a.p||0);cc[a.k][a.i]=Math.max(0,cc[a.k][a.i]-1);if(a.z)S.z.pop()}else S.z.pop();
  org=null;save();renderCounters();renderInCourt()};
 
 /* analysis */
@@ -270,7 +274,7 @@ function renderAn(){
  var zc=zoneCounts(ma,fp),tot=zc.T.reduce(function(a,b){return a+b},0);
  if(!tot){$('insight').textContent='まだコースのデータがありません。「入力」タブで記録しましょう。';return}
  var bi=zc.T.indexOf(Math.max.apply(null,zc.T)),fi=zc.F.indexOf(Math.max.apply(null,zc.F));
- if(ma==='rc'){$('insight').innerHTML='全 <b>'+tot+'</b> 本。レシーブ位置は自コートの「<b>'+RB[Math.floor(bi/3)]+'・'+CN[bi%3]+'</b>」が最多、返球先は相手コートの「<b>'+RN[Math.floor(fi/3)]+'・'+CN[fi%3]+'</b>」が最多です。';return}
+ if(ma==='rc'||ma==='pt'){var lb=ma==='rc'?['レシーブ位置','返球先']:['打った位置','得点コース'];$('insight').innerHTML='全 <b>'+tot+'</b> 本。'+lb[0]+'は自コートの「<b>'+RB[Math.floor(bi/3)]+'・'+CN[bi%3]+'</b>」が最多、'+lb[1]+'は相手コートの「<b>'+RN[Math.floor(fi/3)]+'・'+CN[fi%3]+'</b>」が最多です。';return}
  $('insight').innerHTML='全 <b>'+tot+'</b> 本。自コートで最も打ち込まれたのは「<b>'+RB[Math.floor(bi/3)]+'・'+CN[bi%3]+'</b>」（'+pct(zc.T[bi],tot)+'%）。相手が最も多く打った位置は「<b>'+RN[Math.floor(fi/3)]+'・'+CN[fi%3]+'</b>」です。'}
 $('modeAn').querySelectorAll('button').forEach(function(b){b.onclick=function(){ma=b.dataset.m;
  $('modeAn').querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b)});renderAn()}});
@@ -321,13 +325,33 @@ $('or').querySelectorAll('button').forEach(function(b){b.onclick=function(){nor=
 $('oadd').onclick=function(){var v=$('opn').value.trim();if(!v){$('opn').focus();return}S.o.push({id:S.n++,n:v,r:nor});$('opn').value='';save();render()};
 $('on').value=S.on||'';$('on').oninput=function(){S.on=$('on').value;save()};
 
+/* score course */
+var pk=null;
+function openPick(k){pk={src:k,org:null};$('pick').hidden=false;renderPick()}
+function closePick(){pk=null;$('pick').hidden=true}
+function pkAdd(t){S.z.push({k:'pt',f:pk.org.i,t:t,p:cp,o:co,s:pk.src});var l=S.h[S.h.length-1];if(l&&l.a==='c')l.z=true;save();closePick();renderCounters();renderInCourt()}
+function renderPick(){
+ if(!pk)return;
+ $('pkCourt').innerHTML=courtSVG('pt',pk.org,false);
+ $('pkHint').textContent=(pk.src==='st'?'ストローク':'ボレー')+'の得点：'+(pk.org?'コースのボタン、または相手コートの着弾ゾーンをタップ':'まず、自コートの打った位置をタップ');
+ var d=$('pkDepth');d.innerHTML='<span class="hint" style="margin:0;align-self:center">着弾の深さ</span>'+chipsHTML([{id:0,n:'前',r:''},{id:1,n:'中',r:''},{id:2,n:'後ろ',r:''}],dp);
+ d.querySelectorAll('button').forEach(function(b){b.onclick=function(){dp=+b.dataset.id;renderPick()}});
+ var pr=$('pkPre');pr.hidden=!pk.org;
+ if(pk.org){var oc=pk.org.i%3;
+  pr.innerHTML=[0,1,2].map(function(dc){var nm=dc===oc?'ストレート':dc===1?'センター':'クロス';return '<button class="btn" data-dc="'+dc+'">'+nm+'<small>'+['左','中','右'][dc]+'</small></button>'}).join('');
+  pr.querySelectorAll('button').forEach(function(b){b.onclick=function(){pkAdd((2-dp)*3+(+b.dataset.dc))}})}
+ $('pkCourt').querySelectorAll('rect').forEach(function(r){r.onclick=function(){
+  var i=+r.dataset.i;
+  if(r.dataset.h==='b'){pk.org={i:i,h:'b'};renderPick()}else if(pk.org)pkAdd(i)}})}
+$('pkSkip').onclick=closePick;
+
 /* pdf */
 function buildReport(){
  forceP=true;
  var d=new Date(),h='<h1>ソフトテニス 分析レポート</h1><p class="rmeta">'+d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日　対戦相手：'+(S.on||'未設定')+'　選手：'+(fp==='all'?'全員':pname(fp))+'　相手選手：'+(fo==='all'?'全員':oname(fo))+'</p>';
  renderStats();h+='<h2>確率</h2>'+$('stats').innerHTML;
  if(S.p.length){renderCmp();h+='<h2>選手別の比較</h2>'+$('cmp').innerHTML}
- h+='<h2>コースの傾向</h2><div class="rc">'+[['st','ストローク（黄色の実線）'],['sv','サーブ（白の破線）'],['rc','レシーブ（黄色の点線）']].map(function(k){return '<div><div class="cap">'+k[1]+'</div><div class="court">'+courtSVG(k[0],null,true,fp)+'</div></div>'}).join('')+'</div>';
+ h+='<h2>コースの傾向</h2><div class="rc">'+[['st','ストローク（黄色の実線）'],['sv','サーブ（白の破線）'],['rc','レシーブ（黄色の点線）'],['pt','得点（黄色の一点鎖線）']].map(function(k){return '<div><div class="cap">'+k[1]+'</div><div class="court">'+courtSVG(k[0],null,true,fp)+'</div></div>'}).join('')+'</div>';
  $('report').innerHTML=h;forceP=false}
 $('pdf').onclick=function(){buildReport();setTimeout(function(){try{window.print()}catch(e){alert('この表示では印刷できません。ホーム画面に追加したアプリから実行してください。')}},150)};
 

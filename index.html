@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="日南高校テニス部研究">
+<meta name="apple-mobile-web-app-title" content="戦術ボード">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#001F43">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
-<title>日南高校テニス部研究</title>
+<title>ソフトテニス戦術ボード</title>
 <style>
 :root{--navy:#001F43;--yel:#F4E511;--bg:#EDF1F7;--panel:#fff;--ink:#001F43;--sub:#4a5d78;--line:#cfd8e6;--track:#dfe6f0;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -192,12 +192,19 @@ var mq=window.matchMedia('(orientation:landscape) and (min-width:640px)'),dp=2;
 function isL(){return !forceP&&mq.matches}
 if(mq.addEventListener)mq.addEventListener('change',function(){render()});else if(mq.addListener)mq.addListener(function(){render()});
 function R(hh,i){var r=Math.floor(i/3),c=i%3;
+ if(i>8)return RX(i);
  if(isL())return{x:(hh==='t'?20:220)+CH*r,y:30+80*(2-c),w:CH,h:80};
  return{x:X0+CW*c,y:(hh==='t'?20:220)+CH*r,w:CW,h:CH}}
+function RX(i){var L=isL(),c;
+ if(i<14){
+  if(i<11){c=i===9?0:2;return L?{x:20,y:c?0:270,w:200,h:30}:{x:c?270:0,y:20,w:30,h:200}}
+  c=i-11;return L?{x:-10,y:30+80*(2-c),w:30,h:80}:{x:30+80*c,y:-12,w:80,h:32}}
+ c=i-14;return L?{x:208,y:30+80*(2-c),w:24,h:80}:{x:30+80*c,y:208,w:80,h:24}}
+var ZS=['左外','右外','後左','後中','後右','ネ左','ネ中','ネ右'];
 function cxy(hh,i){var q=R(hh,i);return{x:q.x+q.w/2,y:q.y+q.h/2}}
-function courtSVG(kind,sel,heat,pf){
+function courtSVG(kind,sel,heat,pf,ex){
  var L=isL(),zc=zoneCounts(kind,pf),mT=Math.max.apply(null,zc.T.concat([1])),mF=Math.max.apply(null,zc.F.concat([1]));
- var s='<svg viewBox="0 0 '+(L?440:300)+' '+(L?300:440)+'" role="img" aria-label="コート図">';
+ var s='<svg viewBox="'+(L?'-10 -5 460 310':'-5 -18 310 466')+'" role="img" aria-label="コート図">';
  s+=L?'<rect x="20" y="30" width="400" height="240" fill="none" stroke="#fff" stroke-width="2"/>':'<rect x="30" y="20" width="240" height="400" fill="none" stroke="#fff" stroke-width="2"/>';
  for(var h=0;h<2;h++)for(var i=0;i<9;i++){
   var hh=h?'b':'t',q=R(hh,i),cnt=heat?(h?zc.T[i]:zc.F[i]):0,mx=h?mT:mF;
@@ -205,8 +212,13 @@ function courtSVG(kind,sel,heat,pf){
   s+='<rect data-h="'+hh+'" data-i="'+i+'" x="'+q.x+'" y="'+q.y+'" width="'+q.w+'" height="'+q.h+'" fill="rgba('+((h||isSel)?'244,229,17':'255,255,255')+','+(isSel?.7:a)+')" stroke="'+(isSel?'#F4E511':'rgba(255,255,255,.35)')+'" stroke-width="'+(isSel?3:1)+'"/>';
   s+='<text x="'+(q.x+q.w/2)+'" y="'+(q.y+q.h/2+5)+'" text-anchor="middle" font-size="'+(heat&&cnt?20:13)+'" font-weight="'+(heat&&cnt?800:400)+'" fill="'+(heat&&cnt?(h?'#F4E511':'#fff'):'rgba(255,255,255,.45)')+'" pointer-events="none">'+(heat?(cnt||''):(i+1))+'</text>'}
  s+=L?'<line x1="220" y1="12" x2="220" y2="288" stroke="#F4E511" stroke-width="4"/>':'<line x1="12" y1="220" x2="288" y2="220" stroke="#F4E511" stroke-width="4"/>';
- s+='<text x="'+(L?120:150)+'" y="'+(L?20:12)+'" text-anchor="middle" font-size="10" fill="rgba(255,255,255,.7)">相手コート</text>';
+ if(!(ex==='out'||heat))s+='<text x="'+(L?120:150)+'" y="'+(L?20:12)+'" text-anchor="middle" font-size="10" fill="rgba(255,255,255,.7)">相手コート</text>';
  s+='<text x="'+(L?320:150)+'" y="'+(L?292:436)+'" text-anchor="middle" font-size="10" fill="rgba(255,255,255,.7)">自コート</text>';
+ if(ex||heat){for(var j=9;j<17;j++){
+  if(ex==='out'&&j>=14)continue;if(ex==='net'&&j<14)continue;
+  var xq=R('t',j),cn=heat?zc.F[j]:0,nt=j>=14;
+  s+='<rect data-h="'+(nt?'n':'o')+'" data-i="'+j+'" x="'+xq.x+'" y="'+xq.y+'" width="'+xq.w+'" height="'+xq.h+'" fill="rgba(244,229,17,'+(heat?(cn?(cn/mF)*.55:.06):(nt?.28:.14))+')" stroke="rgba(255,255,255,.5)" stroke-width="1" stroke-dasharray="3 3"/>';
+  s+='<text x="'+(xq.x+xq.w/2)+'" y="'+(xq.y+xq.h/2+4)+'" text-anchor="middle" font-size="'+(heat&&cn?16:10)+'" font-weight="'+(heat&&cn?800:400)+'" fill="'+(heat&&cn?'#F4E511':'rgba(255,255,255,.75)')+'" pointer-events="none">'+(heat?(cn||''):ZS[j-9])+'</text>'}}
  var m=agg(kind,pf);
  Object.keys(m).forEach(function(q){var z=m[q],w=Math.min(2+z.n*1.5,9),rc=z.k==='rc'||z.k==='pt'||z.k==='ms',sv=z.k==='sv',a=cxy(rc?'b':'t',z.f),b=cxy(rc?'t':'b',z.t),col=(sv||z.k==='ms')?'#fff':'#F4E511';
   s+='<line x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'" stroke="'+col+'" stroke-width="'+w+'" stroke-linecap="round" opacity=".8"'+(sv?' stroke-dasharray="8 6"':z.k==='ms'?' stroke-dasharray="0.1 9"':z.k==='pt'?' stroke-dasharray="12 5 2 5"':rc?' stroke-dasharray="1 10"':'')+' pointer-events="none"/>';
@@ -215,7 +227,7 @@ function courtSVG(kind,sel,heat,pf){
 function cx(c){return X0+CW*c+CW/2}
 function cy(h,r){return (h==='t'?Y0:220)+CH*r+CH/2}
 function agg(kind,pf){var m={};S.z.forEach(function(z){if(km(kind,z.k)&&(pf==null||pf==='all'||(z.p||0)==pf)&&(pf==null||fo==='all'||(z.o||0)==fo)){var q=z.k+z.f+'-'+z.t;m[q]=m[q]||{f:z.f,t:z.t,n:0,k:z.k};m[q].n++}});return m}
-function zoneCounts(kind,pf){var T=[0,0,0,0,0,0,0,0,0],F=[0,0,0,0,0,0,0,0,0];
+function zoneCounts(kind,pf){var T=new Array(17).fill(0),F=new Array(17).fill(0);
  S.z.forEach(function(z){if(km(kind,z.k)&&(pf==null||pf==='all'||(z.p||0)==pf)&&(pf==null||fo==='all'||(z.o||0)==fo)){if(z.k==='rc'||z.k==='pt'||z.k==='ms'){T[z.f]++;F[z.t]++}else{T[z.t]++;F[z.f]++}}});return{T:T,F:F}}
 function courtSVGold(kind,sel,heat,pf){
  var zc=zoneCounts(kind,pf),mT=Math.max.apply(null,zc.T.concat([1])),mF=Math.max.apply(null,zc.F.concat([1]));
@@ -260,7 +272,7 @@ function renderAn(){
  var zc=zoneCounts(ma,fp),tot=zc.T.reduce(function(a,b){return a+b},0);
  if(!tot){$('insight').textContent='まだコースのデータがありません。「入力」タブで記録しましょう。';return}
  var bi=zc.T.indexOf(Math.max.apply(null,zc.T)),fi=zc.F.indexOf(Math.max.apply(null,zc.F));
- if(ma==='rc'||ma==='pt'||ma==='ms'||ma==='pm'){var lb=ma==='rc'?['レシーブ位置','返球先']:['打った位置',ma==='ms'?'ミスの狙い先':ma==='pm'?'得点・ミスの狙い先':'得点コース'];$('insight').innerHTML='全 <b>'+tot+'</b> 本。'+lb[0]+'は自コートの「<b>'+RB[Math.floor(bi/3)]+'・'+CN[bi%3]+'</b>」が最多、'+lb[1]+'は相手コートの「<b>'+RN[Math.floor(fi/3)]+'・'+CN[fi%3]+'</b>」が最多です。';return}
+ if(ma==='rc'||ma==='pt'||ma==='ms'||ma==='pm'){var lb=ma==='rc'?['レシーブ位置','返球先']:['打った位置',ma==='ms'?'ミスの狙い先':ma==='pm'?'得点・ミスの狙い先':'得点コース'];$('insight').innerHTML='全 <b>'+tot+'</b> 本。'+lb[0]+'は自コートの「<b>'+RB[Math.floor(bi/3)]+'・'+CN[bi%3]+'</b>」が最多、'+lb[1]+'は相手コートの「<b>'+fn(fi)+'</b>」が最多です。';return}
  $('insight').innerHTML='全 <b>'+tot+'</b> 本。自コートで最も打ち込まれたのは「<b>'+RB[Math.floor(bi/3)]+'・'+CN[bi%3]+'</b>」（'+pct(zc.T[bi],tot)+'%）。相手が最も多く打った位置は「<b>'+RN[Math.floor(fi/3)]+'・'+CN[fi%3]+'</b>」です。'}
 $('modeAn').querySelectorAll('button').forEach(function(b){b.onclick=function(){ma=b.dataset.m;
  $('modeAn').querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b)});renderAn()}});
@@ -313,6 +325,8 @@ $('on').value=S.on||'';$('on').oninput=function(){S.on=$('on').value;save()};
 
 /* input view */
 var iv='in';
+var ZN=['左サイドアウト','右サイドアウト','後ろアウト・左','後ろアウト・中','後ろアウト・右','ネット・左','ネット・中','ネット・右'];
+function fn(i){return i<9?RN[Math.floor(i/3)]+'・'+CN[i%3]:ZN[i-9]}
 function km(kind,k){return kind==='all'||k===kind||(kind==='pm'&&(k==='pt'||k==='ms'))}
 
 /* loss type */
@@ -333,21 +347,22 @@ function closePick(){pk=null;$('pick').hidden=true}
 function pkAdd(t){var ms=pk.md==='ms',l=S.h[S.h.length-1];S.z.push({k:pk.md,f:pk.org.i,t:t,p:cp,o:co,s:pk.src,m:pk.t});if(ms)S.e.push({k:pk.src,p:cp,o:co,t:pk.t});if(l&&l.a==='c'){l.z=true;if(ms)l.m=true}save();closePick();renderCounters();renderInCourt()}
 function renderPick(){
  if(!pk)return;
- $('pkCourt').innerHTML=courtSVG(pk.md,pk.org,false);
+ $('pkCourt').innerHTML=courtSVG(pk.md,pk.org,false,null,pk.md==='ms'?pk.t:null);
  $('pkT').textContent=pk.md==='ms'?'ミスのコース':'得点のコース';
  var ty=$('pkType');ty.hidden=pk.md!=='ms';
  if(pk.md==='ms'){ty.innerHTML=chipsHTML([{id:'out',n:'アウト',r:''},{id:'net',n:'ネット',r:''}],pk.t);ty.querySelectorAll('button').forEach(function(b){b.onclick=function(){pk.t=b.dataset.id;renderPick()}})}
  $('pkSkip').textContent=pk.md==='ms'?'コースは入力しない（種類のみ記録）':'コースは入力しない';
- $('pkHint').textContent=(pk.src==='st'?'ストローク':'ボレー')+(pk.md==='ms'?'のミス：':'の得点：')+(pk.md==='ms'&&!pk.t?'まず、アウトかネットを選んでください':pk.org?'コースのボタン、または相手コートの着弾ゾーンをタップ':'まず、自コートの打った位置をタップ');
+ $('pkHint').textContent=(pk.src==='st'?'ストローク':'ボレー')+(pk.md==='ms'?'のミス：':'の得点：')+(pk.md==='ms'&&!pk.t?'まず、アウトかネットを選んでください':pk.org?(pk.t==='out'?'コートの外（後ろ・左右）の行き先を選んでください':pk.t==='net'?'ネットのどこに当たったか選んでください':'コースのボタン、または相手コートの着弾ゾーンをタップ'):'まず、自コートの打った位置をタップ');
  var d=$('pkDepth');d.innerHTML='<span class="hint" style="margin:0;align-self:center">着弾の深さ</span>'+chipsHTML([{id:0,n:'前',r:''},{id:1,n:'中',r:''},{id:2,n:'後ろ',r:''}],dp);
- d.hidden=pk.t==='net';d.querySelectorAll('button').forEach(function(b){b.onclick=function(){dp=+b.dataset.id;renderPick()}});
+ d.hidden=pk.t==='net'||pk.t==='out';d.querySelectorAll('button').forEach(function(b){b.onclick=function(){dp=+b.dataset.id;renderPick()}});
  var ok=pk.md!=='ms'||pk.t,pr=$('pkPre');pr.hidden=!pk.org||!ok;
  if(pk.org&&ok){var oc=pk.org.i%3;
+  if(pk.t==='out'||pk.t==='net'){var ds=pk.t==='out'?[[9,'左サイド'],[11,'後ろ・左'],[12,'後ろ・中'],[13,'後ろ・右'],[10,'右サイド']]:[[14,'ネット・左'],[15,'ネット・中'],[16,'ネット・右']];pr.innerHTML=ds.map(function(x){return '<button class="btn" data-z="'+x[0]+'">'+x[1]+'</button>'}).join('')}else
   pr.innerHTML=[0,1,2].map(function(dc){var nm=dc===oc?'ストレート':dc===1?'センター':'クロス';return '<button class="btn" data-dc="'+dc+'">'+nm+'<small>'+['左','中','右'][dc]+'</small></button>'}).join('');
-  pr.querySelectorAll('button').forEach(function(b){b.onclick=function(){pkAdd((pk.t==='net'?2:2-dp)*3+(+b.dataset.dc))}})}
+  pr.querySelectorAll('button').forEach(function(b){b.onclick=function(){pkAdd(b.dataset.z?+b.dataset.z:(2-dp)*3+(+b.dataset.dc))}})}
  $('pkCourt').querySelectorAll('rect').forEach(function(r){r.onclick=function(){
   var i=+r.dataset.i;
-  if(r.dataset.h==='b'){pk.org={i:i,h:'b'};renderPick()}else if(pk.org&&ok)pkAdd(i)}})}
+  var hz=r.dataset.h;if(hz==='b'){pk.org={i:i,h:'b'};renderPick()}else if(pk.org&&ok&&(pk.md==='pt'?hz==='t':pk.t==='out'?hz==='o':hz==='n'))pkAdd(i)}})}
 $('pkSkip').onclick=function(){
  if(pk&&pk.md==='ms'&&pk.t){S.e.push({k:pk.src,p:cp,o:co,t:pk.t});var l=S.h[S.h.length-1];if(l&&l.a==='c')l.m=true;save();renderCounters()}
  closePick()};

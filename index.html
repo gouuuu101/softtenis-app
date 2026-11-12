@@ -102,6 +102,10 @@ body{background:#fff}
 .court,.trk,.trk i{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .ov{overflow:visible}table.cmp{min-width:0}
 }
+.bd{display:grid;grid-template-columns:1fr 92px 92px;gap:6px 10px;align-items:center;text-align:center}
+.bh{font-size:12px;color:var(--sub)}.bt{text-align:left;font-weight:800;font-size:18px}
+.bt small{display:inline-block;margin-left:8px;background:var(--yel);color:var(--navy);border-radius:6px;padding:0 6px;font-size:11px}
+.bn{font-size:44px;font-weight:800;line-height:1.1;background:var(--navy);color:var(--yel);border-radius:10px;padding:4px 0}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -112,11 +116,12 @@ body{background:#fff}
 <button role="tab" data-v="in" aria-selected="true">入力</button>
 <button role="tab" data-v="an" aria-selected="false">分析</button>
 <button role="tab" data-v="se" aria-selected="false">設定</button>
+<button role="tab" data-v="pt" aria-selected="false">ポイント</button>
 </nav>
 
 <section id="in">
 <div class="card"><h2>選手</h2><div class="seg" id="teamIn"><button data-t="me" aria-pressed="true">自チーム</button><button data-t="op" aria-pressed="false">相手チーム</button></div><div class="chips" id="chipsIn"></div></div>
-<div class="card"><h2>プレー結果</h2><div class="seg" id="srvIn"><button data-s="rx" aria-pressed="true">自チームがレシーブ</button><button data-s="sv" aria-pressed="false">自チームがサーブ</button></div><p class="hint">ストローク・ボレーで得点やミスがあると、レシーブ側の選手のレシーブ成功を自動で1つ加えます（サーブ側は加えません）。</p><div id="counters"></div><div class="act"><button class="btn ghost" id="undo">ひとつ戻す</button></div></div>
+<div class="card"><h2>プレー結果</h2><p class="hint">得点・ミスを押すと、「ポイント」タブのスコアに自動で反映され、レシーブ側のレシーブ成功も自動で入ります。</p><div id="counters"></div><div class="act"><button class="btn ghost" id="undo">ひとつ戻す</button></div></div>
 <div class="card" id="inCard"><h2>選手の得点・ミスコース</h2>
 <div class="chips" id="opIn" style="margin-bottom:10px" hidden></div>
 <div class="court" id="courtIn"></div>
@@ -138,6 +143,21 @@ body{background:#fff}
 </div>
 </section>
 
+<section id="pt" hidden>
+<div class="card"><h2>スコア</h2><div id="board"></div><p class="note" id="binfo"></p>
+<div class="act"><button class="btn" id="mpm">自チーム +1</button><button class="btn" id="mpo">相手チーム +1</button></div>
+<div class="act"><button class="btn ghost" id="undo2">ひとつ戻す</button></div>
+<p class="hint" style="margin-top:8px">「得点」「ミス」「レシーブ失敗」を入力すると自動でスコアが進みます。ダブルフォールトなど、入力できない得点は「+1」で加えてください。</p></div>
+<div class="card"><h2>試合の設定</h2>
+<div class="hint" style="margin:0 0 6px">試合形式</div><div class="chips" id="cfN" style="margin-bottom:12px"></div>
+<div class="hint" style="margin:0 0 6px">最初のサーブ（第1ゲーム）</div><div class="chips" id="cfF" style="margin-bottom:12px"></div>
+<div class="hint" style="margin:0 0 6px">レシーバーの交代（ゲーム開始時は後衛から）</div><div class="chips" id="cfK" style="margin-bottom:12px"></div>
+<div class="hint" style="margin:0 0 6px">自チーム 後衛</div><div class="chips" id="prMeB" style="margin-bottom:10px"></div>
+<div class="hint" style="margin:0 0 6px">自チーム 前衛</div><div class="chips" id="prMeF" style="margin-bottom:10px"></div>
+<div class="hint" style="margin:0 0 6px">相手チーム 後衛</div><div class="chips" id="prOpB" style="margin-bottom:10px"></div>
+<div class="hint" style="margin:0 0 6px">相手チーム 前衛</div><div class="chips" id="prOpF"></div></div>
+<div class="card"><h2>ゲームの記録</h2><div id="glist"></div></div>
+</section>
 <section id="se" hidden>
 <div class="card"><h2>選手登録</h2>
 <div class="seg" id="pr"><button data-r="前衛" aria-pressed="true">前衛</button><button data-r="後衛" aria-pressed="false">後衛</button></div>
@@ -153,7 +173,7 @@ body{background:#fff}
 <div class="act"><button class="btn ghost" id="theme">表示：自動</button><button class="btn danger" id="reset">全データを消去</button></div>
 </div>
 <div class="card"><h2>用語</h2>
-<p class="note"><span class="pill">効果的</span> 相手を崩した・好機を作った有効なボール（得点率には含めません）<br><span class="pill">得点</span> ポイントになったプレー（押すとコースとフォア／バックを選べます）<br><span class="pill">ミス・失敗</span> 失点。押すと「アウト／ネット」とコースを選べます（レシーブ失敗は種類のみ）<br><span class="pill">得点率</span> 得点÷(得点＋ミス) ／ <span class="pill">効果率</span> 効果的÷全体<br>コース図は相手コートと自コートの各9ゾーンです。得点・ミスは、自コートの打った位置から相手コートへの線で表します。</p>
+<p class="note"><span class="pill">得点</span> ポイントになったプレー（押すとコースとフォア／バックを選べます）<br><span class="pill">ミス・失敗</span> 失点。押すと「アウト／ネット」とコースを選べます（レシーブ失敗は種類のみ）<br><span class="pill">得点率</span> 得点÷(得点＋ミス)<br>コース図は相手コートと自コートの各9ゾーンです。得点・ミスは、自コートの打った位置から相手コートへの線で表します。</p>
 </div>
 </section>
 </div>
@@ -163,11 +183,11 @@ body{background:#fff}
 
 <script>
 var K='softtennis-v1';
-function blank(){return{c:{},z:[],h:[],p:[],o:[],e:[],hd:[],on:'',n:1}}
-function load(){try{var r=localStorage.getItem(K);if(r){var d=JSON.parse(r);if(d.c&&d.c.rv)d.c={'0':d.c};d.p=d.p||[];d.o=d.o||[];d.e=d.e||[];d.hd=d.hd||[];d.on=d.on||'';d.n=d.n||1;return d}}catch(e){}return blank()}
+function blank(){return{c:{},z:[],h:[],p:[],o:[],e:[],hd:[],pt:[],cf:{n:7,fs:'me',rk:2,pr:{me:{},op:{}}},on:'',n:1}}
+function load(){try{var r=localStorage.getItem(K);if(r){var d=JSON.parse(r);if(d.c&&d.c.rv)d.c={'0':d.c};d.p=d.p||[];d.o=d.o||[];d.e=d.e||[];d.hd=d.hd||[];d.pt=d.pt||[];d.cf=d.cf||{n:7,fs:'me',rk:2,pr:{me:{},op:{}}};d.cf.pr=d.cf.pr||{me:{},op:{}};d.on=d.on||'';d.n=d.n||1;return d}}catch(e){}return blank()}
 var S=load();
 function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
-var G=[{k:'fs',n:'サーブレシーブ ①ファーストサーブ（入った？）',b:['入った','入らず']},{k:'rv',n:'サーブレシーブ ②レシーブ結果',b:['成功','失敗']},{k:'st',n:'ストローク',b:['効果的','得点','ミス']},{k:'vo',n:'ボレー',b:['効果的','得点','ミス']}];
+var G=[{k:'fs',n:'サーブレシーブ ①ファーストサーブ（入った？）',b:['入った','入らず']},{k:'rv',n:'サーブレシーブ ②レシーブ結果',b:['成功','失敗']},{k:'st',n:'ストローク',b:[null,'得点','ミス']},{k:'vo',n:'ボレー',b:[null,'得点','ミス']}];
 var $=function(i){return document.getElementById(i)};
 var mi='st',ma='pm',org=null,fp='all',cp=S.p.length?S.p[0].id:0,nr='前衛',nor='前衛',co=0,fo='all',forceP=false,team='me',at='me',srvme=false;
 function isOp(id){return id<0||S.o.some(function(o){return o.id===id})}
@@ -178,17 +198,20 @@ function C(pid){if(!S.c[pid])S.c[pid]={fs:[0,0],rv:[0,0],st:[0,0,0],vo:[0,0,0]};
 /* tabs */
 document.querySelectorAll('nav button').forEach(function(b){b.onclick=function(){
  document.querySelectorAll('nav button').forEach(function(x){x.setAttribute('aria-selected',x===b)});
- FH=b.dataset.v==='an'?fh:'all';['in','an','se'].forEach(function(v){$(v).hidden=v!==b.dataset.v});render()}});
+ FH=b.dataset.v==='an'?fh:'all';['in','an','se','pt'].forEach(function(v){$(v).hidden=v!==b.dataset.v});render()}});
 
 /* counters */
 function renderCounters(){
  $('counters').innerHTML=G.map(function(g){
-  var cols=g.b.length===2?'c2':'c3';
+  var cols=g.b.filter(function(x){return x}).length===2?'c2':'c3';
   return '<div style="margin-bottom:12px"><div class="hint" style="font-weight:700;color:inherit">'+g.n+'</div><div class="row '+cols+'">'+
-  g.b.map(function(l,i){var cls=(l==='効果的'||((g.k==='rv'||g.k==='fs')&&i===0))?'good':(l==='ミス'||l==='失敗'||l==='入らず')?'bad':'';
+  g.b.map(function(l,i){if(!l)return '';var cls=(l==='効果的'||((g.k==='rv'||g.k==='fs')&&i===0))?'good':(l==='ミス'||l==='失敗'||l==='入らず')?'bad':'';
    return '<button class="cnt '+cls+'" data-k="'+g.k+'" data-i="'+i+'"><span>'+l+'</span><em>'+C(cp)[g.k][i]+'</em></button>'}).join('')+'</div></div>'}).join('');
  document.querySelectorAll('.cnt').forEach(function(b){b.onclick=function(){
-  var k=b.dataset.k,i=+b.dataset.i;C(cp)[k][i]++;var en={a:'c',k:k,i:i,p:cp};if((k==='st'||k==='vo')&&i>0&&((team==='op')===srvme)){C(cp).rv[0]++;en.rs=true}S.h.push(en);save();renderCounters();if(k==='fs'){}else if(i===1&&k!=='rv')openPick(k,'pt');else if(k==='rv'){if(i===1)openLoss(k)}else if(i===2)openPick(k,'ms')}})}
+  var k=b.dataset.k,i=+b.dataset.i;C(cp)[k][i]++;var en={a:'c',k:k,i:i,p:cp},pw=null,sd=isOp(cp)?'op':'me',sv2=(k==='st'||k==='vo');
+if(sv2&&i===1)pw=sd;else if(sv2&&i===2)pw=other(sd);else if(k==='rv'&&i===1)pw=other(sd);
+if(pw){var pr=addPoint(pw,k!=='rv');if(pr){en.pt=true;if(pr.rid!=null)en.rid=pr.rid}}
+S.h.push(en);save();renderCounters();if(k==='fs'){}else if(i===1&&k!=='rv')openPick(k,'pt');else if(k==='rv'){if(i===1)openLoss(k)}else if(i===2)openPick(k,'ms')}})}
 
 /* court */
 var X0=30,CW=80,Y0=20,CH=66.67;
@@ -260,9 +283,11 @@ function renderInCourt(){
  $('courtIn').innerHTML=courtSVG('pm',null,true,cp);
  var pz=S.z.filter(function(z){return (z.p||0)==cp&&z.k==='pt'}).length,mz=S.z.filter(function(z){return (z.p||0)==cp&&z.k==='ms'}),mo=mz.filter(function(z){return z.m==='out'}).length,mn=mz.filter(function(z){return z.m==='net'}).length;
  $('pmInfo').innerHTML='<b>'+pname(cp)+'</b>：得点コース <b>'+pz+'</b>本（黄色の一点鎖線）／ミスコース <b>'+mz.length+'</b>本（白の点線）　アウト '+mo+'・ネット '+mn+'<br>得点 フォア '+hc('pt',cp)[0]+'・バック '+hc('pt',cp)[1]+'／ミス フォア '+hc('ms',cp)[0]+'・バック '+hc('ms',cp)[1]}
-$('undo').onclick=function(){var a=S.h.pop();if(!a)return;
- if(a.a==='c'){var cc=C(a.p||0);cc[a.k][a.i]=Math.max(0,cc[a.k][a.i]-1);if(a.z)S.z.pop();if(a.m)S.e.pop();if(a.hd)S.hd.pop();if(a.rs)cc.rv[0]=Math.max(0,cc.rv[0]-1)}else S.z.pop();
- org=null;save();renderCounters();renderInCourt()};
+function undoLast(){var a=S.h.pop();if(!a)return;
+ if(a.a==='c'){var cc=C(a.p||0);cc[a.k][a.i]=Math.max(0,cc[a.k][a.i]-1);if(a.z)S.z.pop();if(a.m)S.e.pop();if(a.hd)S.hd.pop()}
+ if(a.pt){S.pt.pop();if(a.rid!=null){var rr=C(a.rid);rr.rv[0]=Math.max(0,rr.rv[0]-1)}}
+ org=null;save();render()}
+$('undo').onclick=undoLast;$('undo2').onclick=undoLast;
 
 /* analysis */
 function pct(n,d){return d?Math.round(n/d*100):0}
@@ -271,7 +296,7 @@ function bar(label,n,d,ng){var p=pct(n,d);
 function renderStats(){
  var T=tot(fp),rv=T.rv,rn=rv[0]+rv[1],h='<div class="hint" style="font-weight:700;color:inherit">ファーストサーブ</div>'+bar('ファーストサーブ入り率',T.fs[0],T.fs[0]+T.fs[1])+'<div class="hint" style="font-weight:700;color:inherit;margin-top:16px">サーブレシーブ</div>'+bar('成功率',rv[0],rn)+bar('失敗率',rv[1],rn,1)+lossBars('rv',rv[1]);
  [['st','ストローク'],['vo','ボレー']].forEach(function(g){var c=T[g[0]],n=c[0]+c[1]+c[2];
-  h+='<div class="hint" style="font-weight:700;color:inherit;margin-top:16px">'+g[1]+'</div>'+bar('得点率（得点÷(得点＋ミス)）',c[1],c[1]+c[2])+bar('効果率（効果的÷全体）',c[0],n)+lossBars(g[0],c[2])});
+  h+='<div class="hint" style="font-weight:700;color:inherit;margin-top:16px">'+g[1]+'</div>'+bar('得点率（得点÷(得点＋ミス)）',c[1],c[1]+c[2])+lossBars(g[0],c[2])});
  $('stats').innerHTML=h+handBars()}
 var RN=['後ろ','中','前'],CN=['左','中','右'],RB=['前','中','後ろ'];
 function renderAn(){
@@ -301,8 +326,8 @@ function renderChips(){
  ac.querySelectorAll('button').forEach(function(b){b.onclick=function(){fp=b.dataset.id==='all'?'all':+b.dataset.id;renderChips();renderStats();renderAn();renderCmp()}})}
 function renderCmp(){
  var PL=plist(at);$('cmpCard').hidden=!PL.length;if(!PL.length)return;
- var h='<table class="cmp"><tr><th>選手</th><th>1stサーブ<br>入り率</th><th>レシーブ<br>成功率</th><th>ストローク<br>得点率</th><th>ストローク<br>効果率</th><th>ボレー<br>得点率</th><th>ボレー<br>効果率</th></tr>';
- PL.forEach(function(p){var T=tot(p.id);h+='<tr><td>'+p.n+' <small>'+p.r+'</small></td><td>'+rt(T.fs,'e')+'</td><td>'+rt(T.rv,'e')+'</td><td>'+rt(T.st,'s')+'</td><td>'+rt(T.st,'e')+'</td><td>'+rt(T.vo,'s')+'</td><td>'+rt(T.vo,'e')+'</td></tr>'});
+ var h='<table class="cmp"><tr><th>選手</th><th>1stサーブ<br>入り率</th><th>レシーブ<br>成功率</th><th>ストローク<br>得点率</th><th>ボレー<br>得点率</th></tr>';
+ PL.forEach(function(p){var T=tot(p.id);h+='<tr><td>'+p.n+' <small>'+p.r+'</small></td><td>'+rt(T.fs,'e')+'</td><td>'+rt(T.rv,'e')+'</td><td>'+rt(T.st,'s')+'</td><td>'+rt(T.vo,'s')+'</td></tr>'});
  $('cmp').innerHTML=h+'</table>'}
 function renderRoster(){
  $('roster').innerHTML=S.p.length?S.p.map(function(p){return '<div class="rost"><span><b>'+p.n+'</b> <small>'+p.r+'</small></span><button data-id="'+p.id+'">削除</button></div>'}).join(''):'<p class="hint">まだ選手が登録されていません。</p>';
@@ -335,7 +360,6 @@ $('on').value=S.on||'';$('on').oninput=function(){S.on=$('on').value;save()};
 var iv='in';
 $('teamIn').querySelectorAll('button').forEach(function(b){b.onclick=function(){team=b.dataset.t;cp=-99;org=null;render()}});
 $('teamAn').querySelectorAll('button').forEach(function(b){b.onclick=function(){at=b.dataset.t;fp='all';render()}});
-$('srvIn').querySelectorAll('button').forEach(function(b){b.onclick=function(){srvme=b.dataset.s==='sv';$('srvIn').querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b)})}});
 var fh='all',FH='all';
 function hc(k,pf){var a=S.hd.filter(function(x){return x.k===k&&(pf==='all'?isOp(x.p||0)===(at==='op'):(x.p||0)==pf)});return[a.filter(function(x){return x.h==='f'}).length,a.filter(function(x){return x.h==='b'}).length]}
 function handBars(){var a=hc('pt',fp),b=hc('ms',fp);if(!(a[0]+a[1]+b[0]+b[1]))return '';
@@ -386,6 +410,47 @@ $('pkSkip').onclick=function(){
  if(pk&&pk.md==='ms'&&pk.t){S.e.push({k:pk.src,p:cp,o:co,t:pk.t});var l=S.h[S.h.length-1];if(l&&l.a==='c')l.m=true;save();renderCounters()}
  closePick()};
 
+/* score */
+function other(t){return t==='me'?'op':'me'}
+function srvTeam(F,gi,j,f){var fr=gi%2===0?F:other(F);return f?(Math.floor(j/2)%2===0?fr:other(fr)):fr}
+function gs(){
+ var c=S.cf,tg=Math.ceil(c.n/2),fn=(c.n-1)/2,gm=0,go=0,gi=0,pm=0,po=0,j=0,rc={me:0,op:0},games=[],done=false;
+ for(var i=0;i<S.pt.length&&!done;i++){
+  var f=gm===fn&&go===fn,sT=srvTeam(c.fs,gi,j,f);rc[other(sT)]++;
+  if(S.pt[i].w==='me')pm++;else po++;j++;
+  if(Math.max(pm,po)>=(f?7:4)&&Math.abs(pm-po)>=2){
+   if(pm>po)gm++;else go++;games.push({m:pm,o:po,f:f,s:srvTeam(c.fs,gi,0,false)});
+   gi++;pm=0;po=0;j=0;rc={me:0,op:0};if(gm>=tg||go>=tg)done=true}}
+ var f2=gm===fn&&go===fn&&!done,sT2=srvTeam(c.fs,gi,j,f2),rT=other(sT2),k=c.rk||2;
+ return{done:done,gm:gm,go:go,pm:pm,po:po,gi:gi,j:j,f:f2,st:sT2,sr:(f2?Math.floor(j/4):Math.floor(j/2))%2===0?'後衛':'前衛',rt:rT,rr:Math.floor(rc[rT]/k)%2===0?'後衛':'前衛',games:games}}
+function pairId(t,key){var L=plist(t),ch=S.cf.pr[t]?S.cf.pr[t][key]:null;
+ if(ch!=null&&L.some(function(p){return p.id===ch}))return ch;
+ var r=key==='b'?'後衛':'前衛',f=L.filter(function(p){return p.r===r})[0];return f?f.id:null}
+function recvId(st){var id=pairId(st.rt,st.rr==='後衛'?'b':'f');return id==null?(st.rt==='me'?0:-1):id}
+function addPoint(w,auto){var st=gs();if(st.done)return null;var rid=null;
+ if(auto){rid=recvId(st);C(rid).rv[0]++}
+ S.pt.push({w:w,rid:rid});save();return{rid:rid}}
+function manual(w){if(gs().done)return;S.pt.push({w:w,rid:null});S.h.push({a:'m',pt:true});save();render()}
+$('mpm').onclick=function(){manual('me')};$('mpo').onclick=function(){manual('op')};
+function who(t,role){var id=pairId(t,role==='後衛'?'b':'f');return (t==='me'?'自チーム':'相手チーム')+'の'+(id==null?'':pname(id)+'（')+role+(id==null?'':'）')}
+function setChips(id,list,sel,fn){var c=$(id);c.innerHTML=chipsHTML(list,sel);c.querySelectorAll('button').forEach(function(b){b.onclick=function(){fn(b.dataset.id);save();render()}})}
+function renderScore(){
+ var st=gs(),c=S.cf,th=st.f?6:3,mn=Math.min(st.pm,st.po),tie=st.pm===st.po&&mn>=th,adv=Math.abs(st.pm-st.po)===1&&mn>=th;
+ function row(t,g,p){return '<div class="bt">'+(t==='me'?'自チーム':'相手チーム')+(!st.done&&st.st===t?'<small>サーブ</small>':'')+'</div><div class="bn">'+g+'</div><div class="bn">'+p+'</div>'}
+ $('board').innerHTML='<div class="bd"><div></div><div class="bh">ゲーム</div><div class="bh">ポイント</div>'+row('me',st.gm,st.pm)+row('op',st.go,st.po)+'</div>';
+ var t=[];
+ if(st.done)t.push('<b>試合終了：'+(st.gm>st.go?'自チーム':'相手チーム')+'の勝ち（'+st.gm+'−'+st.go+'）</b>');
+ else{t.push('第'+(st.gi+1)+'ゲーム'+(st.f?'（ファイナルゲーム・7ポイント先取）':'')+(tie?'　<b>デュース</b>':adv?'　<b>アドバンテージ：'+(st.pm>st.po?'自チーム':'相手チーム')+'</b>':'')+(st.gi%2===1&&st.j===0&&!st.f?'　<b>コートチェンジ</b>':''));
+  t.push('サーバー：'+who(st.st,st.sr)+'<br>レシーバー：'+who(st.rt,st.rr))}
+ $('binfo').innerHTML=t.join('<br>');
+ $('glist').innerHTML=st.games.length?st.games.map(function(g,i){return '<div class="rost"><span>第'+(i+1)+'ゲーム'+(g.f?'（ファイナル）':'')+'<small>　'+(g.s==='me'?'自チームサーブ':'相手サーブ')+'</small></span><b>'+g.m+' − '+g.o+'</b></div>'}).join(''):'<p class="hint">まだゲームが終わっていません。</p>';
+ setChips('cfN',[3,5,7,9].map(function(n){return{id:n,n:n+'ゲームマッチ',r:''}}),c.n,function(v){c.n=+v});
+ setChips('cfF',[{id:'me',n:'自チーム',r:''},{id:'op',n:'相手チーム',r:''}],c.fs,function(v){c.fs=v});
+ setChips('cfK',[{id:2,n:'2ポイントごと',r:''},{id:1,n:'1ポイントごと',r:''}],c.rk||2,function(v){c.rk=+v});
+ [['prMeB','me','b'],['prMeF','me','f'],['prOpB','op','b'],['prOpF','op','f']].forEach(function(x){
+  var L=plist(x[1]);if(!L.length){$(x[0]).innerHTML='<span class="hint" style="margin:0">設定タブで登録してください</span>';return}
+  setChips(x[0],L,pairId(x[1],x[2]),function(v){c.pr[x[1]]=c.pr[x[1]]||{};c.pr[x[1]][x[2]]=+v})})}
+
 /* pdf */
 function buildReport(){
  forceP=true;
@@ -400,12 +465,12 @@ $('pdf').onclick=function(){buildReport();setTimeout(function(){try{window.print
 var armed=false,th='auto';
 $('reset').onclick=function(){var b=$('reset');
  if(!armed){armed=true;b.textContent='もう一度押すと消去します';setTimeout(function(){armed=false;b.textContent='全データを消去'},4000);return}
- var kp=S.p,ko=S.o,kt=S.on,kn=S.n;S=blank();S.p=kp;S.o=ko;S.on=kt;S.n=kn;org=null;save();armed=false;b.textContent='全データを消去';render()};
+ var kp=S.p,ko=S.o,kt=S.on,kn=S.n,kc=S.cf;S=blank();S.p=kp;S.o=ko;S.on=kt;S.n=kn;S.cf=kc;org=null;save();armed=false;b.textContent='全データを消去';render()};
 $('theme').onclick=function(){th=th==='auto'?'dark':th==='dark'?'light':'auto';
  if(th==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',th);
  $('theme').textContent='表示：'+({auto:'自動',dark:'ダーク',light:'ライト'})[th]};
 
-function render(){renderChips();renderOps();renderHd();renderRoster();renderOroster();renderCounters();renderInCourt();renderStats();renderAn();renderCmp()}
+function render(){renderChips();renderOps();renderHd();renderScore();renderRoster();renderOroster();renderCounters();renderInCourt();renderStats();renderAn();renderCmp()}
 render();
 if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){})});
 </script>
